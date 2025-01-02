@@ -2,13 +2,13 @@ use itertools::Itertools;
 use stwo_prover::constraint_framework::preprocessed_columns::PreprocessedColumn;
 
 // List of sizes to initialize the preprocessed trace with for `PreprocessedColumn::IsFirst`.
-const IS_FIRST_LOG_SIZES: [u32; 19] = [
-    22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4,
+const IS_FIRST_LOG_SIZES: [u32; 21] = [
+    24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4,
 ];
 
 // List of sizes to initialize the preprocessed trace with for `PreprocessedColumn::Seq`.
-const SEQ_LOG_SIZES: [u32; 19] = [
-    22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4,
+const SEQ_LOG_SIZES: [u32; 21] = [
+    24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4,
 ];
 
 /// Returns column info for the preprocessed trace.
