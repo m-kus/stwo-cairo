@@ -9,7 +9,8 @@ use stwo_cairo_prover::input::vm_import::{adapt_vm_output, VmImportError};
 use stwo_cairo_prover::input::ProverInput;
 use stwo_cairo_utils::binary_utils::run_binary;
 use stwo_prover::core::prover::ProvingError;
-use stwo_prover::core::vcs::blake2_merkle::Blake2sMerkleChannel;
+use stwo_cairo_serialize::CairoSerialize;
+use stwo_prover::core::vcs::poseidon252_merkle::Poseidon252MerkleChannel;
 use thiserror::Error;
 use tracing::{span, Level};
 
@@ -73,12 +74,22 @@ fn run(args: impl Iterator<Item = String>) -> Result<(), Error> {
     );
 
     // TODO(Ohad): Propagate hash from CLI args.
-    let proof = prove_cairo::<Blake2sMerkleChannel>(vm_output, prover_config)?;
+    let proof = prove_cairo::<Poseidon252MerkleChannel>(vm_output, prover_config)?;
 
-    std::fs::write(args.proof_path, serde_json::to_string(&proof)?)?;
+    let mut output: Vec<starknet_ff::FieldElement> = Vec::new();
+    CairoSerialize::serialize(&proof, &mut output);
+
+    let mut result = output
+        .into_iter()
+        .map(|felt| felt.to_string())
+        .reduce(|acc, elt| format!("{acc} {elt}"))
+        .unwrap();
+    result = format!("[{result}]");
+
+    std::fs::write(args.proof_path, result)?;
 
     if args.verify {
-        verify_cairo::<Blake2sMerkleChannel>(proof)?;
+        verify_cairo::<Poseidon252MerkleChannel>(proof)?;
         log::info!("Proof verified successfully");
     }
 
