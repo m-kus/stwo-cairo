@@ -3,10 +3,12 @@ use starknet_ff::FieldElement;
 pub use stwo_cairo_serialize_derive::CairoSerialize;
 use stwo_prover::core::fields::m31::BaseField;
 use stwo_prover::core::fields::qm31::SecureField;
+use stwo_prover::core::fields::Field;
 use stwo_prover::core::fri::{FriLayerProof, FriProof};
 use stwo_prover::core::pcs::{CommitmentSchemeProof, PcsConfig};
 use stwo_prover::core::poly::line::LinePoly;
 use stwo_prover::core::prover::StarkProof;
+use stwo_prover::core::vcs::blake2_hash::Blake2sHash;
 use stwo_prover::core::vcs::ops::MerkleHasher;
 use stwo_prover::core::vcs::prover::MerkleDecommitment;
 
@@ -192,5 +194,14 @@ impl CairoSerialize for PcsConfig {
         output.push((self.fri_config.log_blowup_factor).into());
         output.push((self.fri_config.log_last_layer_degree_bound).into());
         output.push((self.fri_config.n_queries).into());
+    }
+}
+
+impl CairoSerialize for Blake2sHash {
+    fn serialize(&self, output: &mut Vec<FieldElement>) {
+        // Serialize as u256 { lo: u128, hi: u128 }
+        // TODO: is this a desired Cairo type for hash digest?
+        output.push(FieldElement::from_byte_slice_be(&self.0[16..]).unwrap());
+        output.push(FieldElement::from_byte_slice_be(&self.0[..16]).unwrap());
     }
 }
