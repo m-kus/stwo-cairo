@@ -196,8 +196,23 @@ impl ConfigBuilder {
 /// Used both for producing and verifying proofs.
 #[derive(Default, Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct ProverParameters {
+    /// Hash function used to draw elements from the prover-verifier channel.
+    pub channel_hash: ChannelHash,
     /// Parameters of the commitment scheme.
     pub pcs_config: PcsConfig,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ChannelHash {
+    Blake2s,
+    Poseidon252,
+}
+
+impl Default for ChannelHash {
+    fn default() -> Self {
+        Self::Blake2s
+    }
 }
 
 #[derive(Error, Debug)]
