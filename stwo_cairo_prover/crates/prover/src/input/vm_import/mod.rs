@@ -4,9 +4,10 @@ use std::io::Read;
 use std::path::Path;
 
 use bytemuck::{bytes_of_mut, Pod, Zeroable};
-use cairo_vm::air_public_input::{MemorySegmentAddresses, PublicInput};
+use cairo_vm::air_public_input::{MemorySegmentAddresses, PublicInput, PublicInputError};
 use cairo_vm::stdlib::collections::HashMap;
 use cairo_vm::types::builtin_name::BuiltinName;
+use cairo_vm::vm::runners::cairo_runner::CairoRunner;
 use cairo_vm::vm::trace::trace_entry::RelocatedTraceEntry;
 use json::PrivateInput;
 use stwo_cairo_utils::file_utils::{open_file, read_to_string, IoErrorWithPath};
@@ -32,8 +33,16 @@ pub enum VmImportError {
     #[cfg(feature = "std")]
     #[error("JSON error: {0}")]
     Json(#[from] sonic_rs::Error),
+
+    #[error("Public input error: {0}")]
+    PublicInput(#[from] PublicInputError),
+
     #[error("No memory segments")]
     NoMemorySegments,
+    #[error("Trace not relocated")]
+    TraceNotRelocated,
+    #[error("Public memory address out of bounds")]
+    PublicMemoryAddressOutOfBounds,
 }
 
 fn deserialize_inputs<'a>(
@@ -103,6 +112,49 @@ pub fn adapt_vm_output(
         public_memory_addresses,
         &public_input.memory_segments,
         dev_mode,
+    )
+}
+
+/// Creates Cairo input for Stwo from a CairoRunner.
+/// Assumes that the trace and memory are already relocated.
+pub fn stwo_input_from_runner(runner: &CairoRunner, dev_mode: bool) -> Result<ProverInput, VmImportError> {
+    let relocated_trace = runner
+        .relocated_trace
+        .as_ref()
+        .ok_or(VmImportError::TraceNotRelocated)?;
+
+    let public_input = runner.get_air_public_input()?;
+    let public_memory_addresses = public_input
+        .public_memory
+        .iter()
+        .map(|s| s.address
+            .try_into()
+            .map_err(|_| VmImportError::PublicMemoryAddressOutOfBounds))
+        .collect::<Result<Vec<_>, _>>()?;
+
+    let trace_iter = relocated_trace
+        .into_iter()
+        .cloned()
+        .map(Into::into);
+
+    let memory_iter = runner.relocated_memory
+        .iter()
+        .enumerate()
+        .filter_map(|(addr, item)| {
+            item.map(|felt| {
+                MemoryEntry {
+                    address: addr as u64,
+                    value: felt.to_biguint().to_u32_digits().try_into().unwrap(),
+                }
+            })
+        });
+
+    adapt_to_stwo_input(
+        trace_iter, 
+        MemoryBuilder::from_iter(MemoryConfig::default(), memory_iter),
+        public_memory_addresses,
+        &public_input.memory_segments,
+        dev_mode
     )
 }
 
