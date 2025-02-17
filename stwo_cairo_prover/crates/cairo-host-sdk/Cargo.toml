@@ -1,0 +1,17 @@
+[package]
+name = "cairo-host-sdk"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0"
+cairo-lang-runner.workspace = true
+cairo-lang-executable.workspace = true
+cairo-vm.workspace = true
+serde_json.workspace = true
+starknet-ff.workspace = true
+stwo-prover.workspace = true
+
+# Internal crates
+stwo_cairo_prover.workspace = true
+stwo-cairo-serialize.workspace = true
