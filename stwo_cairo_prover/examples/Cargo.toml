@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    "host",
+]
+resolver = "2"
+
+[workspace.dependencies]
+cairo-host-sdk = { path = "../crates/cairo-host-sdk" }

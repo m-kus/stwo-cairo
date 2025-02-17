@@ -9,6 +9,7 @@ members = [
     "crates/vm_runner",
     "crates/common",
     "crates/recursion_bridge",
+    "crates/cairo-host-sdk",
 ]
 resolver = "2"
 
@@ -18,11 +19,10 @@ edition = "2021"
 
 [workspace.dependencies]
 bytemuck = { version = "1.20.0", features = ["derive"] }
-cairo-lang-casm = "2.7.1"
-# TODO(yuval): Use an official version, not a specific commit.
-cairo-vm = { git = "https://github.com/lambdaclass/cairo-vm", rev = "83bfdcf", features = [
-    "mod_builtin",
-], default-features = false }
+cairo-lang-casm = "2.9.2"
+cairo-lang-runner = "2.9.2"
+cairo-lang-executable = "2.9.2"
+cairo-vm = { version = "1.0.2", features = ["mod_builtin"] }
 clap = { version = "4.3.10", features = ["derive"] }
 env_logger = { version = "0.11.5", default-features = false }
 hex = "0.4.3"
@@ -34,6 +34,7 @@ serde = "1.0.207"
 serde_json = "1.0.1"
 stwo_cairo_prover = { path = "crates/prover", version = "~0.1.0" }
 stwo_cairo_utils = { path = "crates/utils", version = "~0.1.0" }
+stwo-cairo-serialize = { path = "crates/cairo-serialize", version = "~0.1.0" }
 # TODO(ShaharS): take stwo version from the source repository.
 stwo-prover = { git = "https://github.com/starkware-libs/stwo", rev = "a194fad", features = [
     "parallel",
