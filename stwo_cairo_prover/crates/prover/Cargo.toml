@@ -20,6 +20,7 @@ cairo-lang-casm.workspace = true
 cairo-vm.workspace = true
 hex.workspace = true
 itertools.workspace = true
+konst = "0.2"
 num-traits.workspace = true
 paste.workspace = true
 # TODO(Ohad): Add parallel config.
