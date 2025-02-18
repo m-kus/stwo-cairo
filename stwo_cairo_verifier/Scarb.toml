@@ -4,4 +4,5 @@ members = [
     "crates/cairo_air",
     "crates/constraint_framework",
     "crates/verifier_core",
+    "crates/env_macro",
 ]

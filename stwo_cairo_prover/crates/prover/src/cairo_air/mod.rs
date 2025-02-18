@@ -24,12 +24,13 @@ use stwo_prover::core::poly::circle::{CanonicCoset, PolyOps};
 use stwo_prover::core::prover::{prove, verify, ProvingError, VerificationError};
 use thiserror::Error;
 use tracing::{span, Level};
+use konst::{primitive::parse_u32, result::unwrap_ctx, option::unwrap_or};
 
 use crate::adapter::ProverInput;
 use crate::components::memory::LOG_MEMORY_ADDRESS_BOUND;
 use crate::components::memory_address_to_id::component::MEMORY_ADDRESS_TO_ID_SPLIT;
 
-const LOG_MAX_ROWS: u32 = 22;
+const LOG_MAX_ROWS: u32 = unwrap_ctx!(parse_u32(unwrap_or!(option_env!("LOG_MAX_ROWS"), "22")));
 
 pub fn prove_cairo<MC: MerkleChannel>(
     input: ProverInput,

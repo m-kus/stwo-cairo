@@ -41,9 +41,8 @@ use stwo_verifier_core::{ColumnArray, ColumnSpan, TreeArray};
 pub mod components;
 pub mod utils;
 
-const PREPROCESSED_COLUMNS_LOG_SIZES: [u32; 19] = [
-    22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4,
-];
+const MAX_LOG_SIZE: u32 = env!("MAX_LOG_SIZE");
+const LOG_N_LANES: u32 = 4;
 
 // (Address, Id, Value)
 pub type PublicMemory = Array<(u32, u32, [u32; 8])>;
@@ -204,9 +203,12 @@ impl CairoClaimImpl of CairoClaimTrait {
         let _invalid_preprocessed_trace_log_sizes = aggregated_log_sizes.pop_front();
 
         let mut preprocessed_trace_log_sizes = array![];
-        for log_size in PREPROCESSED_COLUMNS_LOG_SIZES.span() {
-            preprocessed_trace_log_sizes.append(*log_size);
-            preprocessed_trace_log_sizes.append(*log_size);
+        let mut log_size = MAX_LOG_SIZE;
+
+        while log_size != LOG_N_LANES - 1 {
+            preprocessed_trace_log_sizes.append(log_size);
+            preprocessed_trace_log_sizes.append(log_size);
+            log_size -= 1;
         }
 
         let trace_log_sizes = aggregated_log_sizes.pop_front().unwrap();
@@ -463,10 +465,11 @@ impl CairoAirNewImpl of CairoAirNewTrait {
     ) -> CairoAir {
         let mut preprocessed_columns = array![];
 
-        // TODO: This could be a constant.
-        for is_first_log_size in PREPROCESSED_COLUMNS_LOG_SIZES.span() {
-            preprocessed_columns.append(PreprocessedColumn::IsFirst(*is_first_log_size));
-            preprocessed_columns.append(PreprocessedColumn::Seq(*is_first_log_size));
+        let mut is_first_log_size = MAX_LOG_SIZE;
+        while is_first_log_size != LOG_N_LANES - 1 {
+            preprocessed_columns.append(PreprocessedColumn::IsFirst(is_first_log_size));
+            preprocessed_columns.append(PreprocessedColumn::Seq(is_first_log_size));
+            is_first_log_size -= 1;
         }
 
         let opcode_components = OpcodeComponentsImpl::new(
